@@ -67,6 +67,7 @@ include('bookings.php');
 include('bookings-table.php');
 
 include('savebooking.php');
+include('event-form.php');
 
 
 // Lager custom post type: event
@@ -103,13 +104,13 @@ function create_helli_event() {
 function helli_event_add_meta_box() {
     add_meta_box( 'helli_event_info_meta_box',
         'Event info',
-        'display_helli_event_meta_box',
+        'helli_event_display_meta_box',
         'helli-events', 'normal', 'high'
     );
 }
 
 // Viser inputfelter for event-post
-function display_helli_event_meta_box( $helli_event ) {
+function helli_event_display_meta_box( $helli_event ) {
     
     $event_sted = esc_html( get_post_meta( $helli_event->ID, 'event_sted', true ) );
     $event_booking_status =get_post_meta( $helli_event->ID, 'event_booking_status', true );

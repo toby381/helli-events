@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Helli-Event
-Plugin URI: 
+Plugin URI: https://github.com/toby381/helli-events
 Description: Enkel påmeldingsystem for Eventer osv. 
 Version: 0.1
 Author: Torbjørn Høvde

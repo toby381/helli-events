@@ -3,7 +3,7 @@
 Plugin Name: Helli-Event
 Plugin URI: https://github.com/toby381/helli-events
 Description: Enkel påmeldingsystem for Eventer osv. 
-Version: 0.1
+Version: 0.2
 Author: Torbjørn Høvde
 Author URI: 
 License: GPLv2

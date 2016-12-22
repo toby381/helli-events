@@ -21,32 +21,17 @@ class TT_Example_List_Table extends WP_List_Table {
 
     function column_default($item, $column_name){
         switch($column_name){
-            case 'firstName':
-            case 'lastName':
-            case 'epost':
             case 'user_id':
             case 'event_id':
+            case 'field_cols':
+            case 'field_vals':
                 return $item->$column_name;
             default:
                 return print_r($item,true); //Show the whole array for troubleshooting purposes
         }
     }
 
-    function column_firstName($item){
-        
-        //Build row actions
-        $actions = array(
-            'edit'      => sprintf('<a href="?page=%s&action=%s&booking=%s">Edit</a>',$_REQUEST['page'],'edit',$item->id),
-            'delete'    => sprintf('<a href="?page=%s&action=%s&booking=%s">Delete</a>',$_REQUEST['page'],'delete',$item->id),
-        );
-        
-        //Return the title contents
-        return sprintf('%1$s <span style="color:silver">(id:%2$s)</span>%3$s',
-            /*$1%s*/ $item->firstName,
-            /*$2%s*/ $item->id,
-            /*$3%s*/ $this->row_actions($actions)
-        );
-    }
+
     function column_cb($item){
         return sprintf(
             '<input type="checkbox" name="%1$s[]" value="%2$s" />',
@@ -56,11 +41,20 @@ class TT_Example_List_Table extends WP_List_Table {
     }
     function column_user_id($item) {
         $id = $item->user_id;
+        
+        //Build row actions
+        $actions = array(
+            'edit'      => sprintf('<a href="?page=%s&action=%s&booking=%s">Edit</a>',$_REQUEST['page'],'edit',$item->id),
+            'delete'    => sprintf('<a href="?page=%s&action=%s&booking=%s">Delete</a>',$_REQUEST['page'],'delete',$item->id),
+        );
+        
         if($id > 0) {
+              //Return the title content
+            
             $user = get_user_by( 'ID', $id );
-            return '<a href="'.get_author_posts_url( $id, $user->nicename ).'">'. $user->first_name .'</a>';
+            return '<a href="'.get_author_posts_url( $id, $user->nicename ).'">'. $user->first_name .'</a>'.$this->row_actions($actions);
         } else {
-            return '<span style="color:red">uregistrert bruker</span>';
+            return '<span style="color:red">uregistrert bruker</span>'.$this->row_actions($actions);
         }
     }
     function column_event_id($item) {
@@ -77,11 +71,10 @@ class TT_Example_List_Table extends WP_List_Table {
     function get_columns(){
         $columns = array(
             'cb'        => '<input type="checkbox" />', //Render a checkbox instead of text
-            'firstName'     => 'First name',
-            'lastName'    => 'Last name',
             'user_id'    => 'User',
             'event_id'    => 'Event',
-            'epost'  => 'Epost'
+            'field_cols'    => 'field_cols',
+            'field_vals'    => 'field_vals'
         );
         return $columns;
     }
@@ -147,8 +140,25 @@ class TT_Example_List_Table extends WP_List_Table {
         
         // this adds the prefix which is set by the user upon instillation of wordpress
         $table_name = $wpdb->prefix . 'helli_event_booking';
+        $table_name_meta = $wpdb->prefix . 'helli_event_booking_meta';
+        $table_post_meta = $wpdb->prefix . 'postmeta';
         // this will get the data from your table
-        $data = $wpdb->get_results( "SELECT * FROM $table_name" );
+        $data = $wpdb->get_results( "SELECT 
+                            $table_name.id, 
+                            $table_name.user_id, 
+                            $table_name.event_id, 
+                            GROUP_CONCAT($table_post_meta.meta_value 
+                                ORDER BY $table_name_meta.field_row ASC) AS field_cols, 
+                            GROUP_CONCAT($table_name_meta.field_value
+                                ORDER BY $table_name_meta.field_row ASC) AS field_vals 
+                                    
+                            FROM $table_name 
+                                LEFT JOIN $table_name_meta 
+                                ON $table_name.id = $table_name_meta.booking_id 
+                                LEFT JOIN $table_post_meta
+                                ON $table_post_meta.post_id = $table_name.event_id
+                            WHERE $table_post_meta.meta_key = CONCAT('helli_event_meta_box_form_labels_',$table_name_meta.field_row)
+                            GROUP BY $table_name_meta.booking_id");
                 
         /**
          * REQUIRED for pagination. Let's figure out what page the user is currently 
@@ -196,6 +206,15 @@ class TT_Example_List_Table extends WP_List_Table {
 }
 
 function tt_render_list_page(){
+    
+    /*    
+    $table_book = $wpdb->prefix . 'helli_event_booking';
+        $table_postmeta = $wpdb->prefix . 'postmeta';
+        // this will get the data from your table
+        $data = $wpdb->get_results( "SELECT * FROM $table_name LEFT JOIN $table_postmeta ON $table_postmeta.post_id = $table_name.booking_id AND $table_name.booking_id );
+    */
+    
+    
     
     //Create an instance of our package class...
     $testListTable = new TT_Example_List_Table();

@@ -27,21 +27,27 @@ function helli_event_create_db() {
   	$version = get_option( 'my_plugin_version', '1.0' );
 	$charset_collate = $wpdb->get_charset_collate();
 	$table_name = $wpdb->prefix . HELLIEVENTDBTABLE;
+    $meta_table_name = $wpdb->prefix . HELLIEVENTDBTABLE . "_meta";
 
 	$sql = "CREATE TABLE $table_name (
 		id mediumint(9) NOT NULL AUTO_INCREMENT,
 		time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
         event_id bigint(20),
         user_id bigint(20),
-		lastName varchar(255),
-        firstName varchar(255),
-        address varchar(255),
-        epost varchar(255),
+        UNIQUE KEY id (id)
+	) $charset_collate;";
+    $sql_meta = "CREATE TABLE $meta_table_name (
+		id mediumint(9) NOT NULL AUTO_INCREMENT,
+        booking_id bigint(20),
+        field_row varchar(255),
+        field_value varchar(255),
         UNIQUE KEY id (id)
 	) $charset_collate;";
 
+
 	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 	dbDelta( $sql );
+    dbDelta( $sql_meta );
 	
 	if ( version_compare( $version, '2.0' ) < 0 ) {
 		
@@ -131,7 +137,7 @@ function helli_event_display_meta_box( $helli_event ) {
 
 // lagrer customfelter for event-post i databasen
 function add_helli_event_custom_fields( $helli_event_id, $helli_event ) {
-    // Check post type for movie reviews
+    // Check post type 
     if ( $helli_event->post_type == HELLIEVENTPOSTTYPE ) {
         // Store data in post meta table if present in post data
         if ( isset( $_POST['helli-event_sted'] ) && $_POST['helli-event_sted'] != '' ) {

@@ -43,24 +43,26 @@ get_header(); ?>
                 </article>
                 
             <?php
-                if(get_post_meta( get_the_ID(), 'event_booking_status', true ) == "on") {  ?>
+                if(get_post_meta( get_the_ID(), 'event_booking_status', true ) == "on") { 
+                    $field_count = intval(get_post_meta( get_the_ID(), 'helli_event_meta_box_form_count', true ));
+                ?>
                     
                     <form method = "post" action = ""> 
                             <input type="hidden" name="event_id" value="<?php the_ID(); ?>">
                             <input type="hidden" name="user_id" value="<?php echo get_current_user_id(); ?>">
+                            <input type="hidden" name="field_count" value="<?php echo $field_count; ?>">
                   <h3>Meld deg på</h3>
-                  <p> 
-                     <label for="firstName">Fornavn:</label> 
-                     <input type="text" name="firstName"/>
-                  </p>
-                  <p> 
-                     <label for="lastName">Etternavn:</label> 
-                     <input type="text" name="lastName"/>
-                  </p>
-                    <p> 
-                     <label for="epost">Epost:</label> 
-                     <input type="text" name="epost"/>
-                  </p>
+                <?php
+                    for($i=0;$i<$field_count;$i++) {
+                        $field_label = get_post_meta( get_the_ID(), 'helli_event_meta_box_form_labels_'.$i, true );
+                        $field_type = get_post_meta( get_the_ID(), 'helli_event_meta_box_form_type_'.$i, true ); 
+                        $field_name = "helli_event_field_".$i; ?>
+                      <p> 
+                         <label for="<?php echo $field_name; ?>"><?php echo $field_label; ?></label> 
+                         <input type="text" name="<?php echo $field_name; ?>"/>
+                      </p>
+                  <?php 
+                    } ?>
                   <hr>  
                   <input type="submit" value="Submit" name="booking_submit"/>  
             </form>
